@@ -1,54 +1,66 @@
-package charsCounter;
+package charscounter;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.Scanner;
+import java.io.FileReader;
+import java.io.IOException;
 
-
+/**
+ * This class will read files from the array and count the charactars
+ * 
+ * @author Braa'
+ *
+ */
 public class FilesReader implements Runnable {
-
+	
 	public void run() {
-
-		System.out.println("------------> started FilesReader thread " + CacheCenter.isAllFilesCollected()); 
 		
-		while ( ! CacheCenter.getFiles().isEmpty() || ! CacheCenter.isAllFilesCollected()) {
+		while ( ! CacheCenter.getFilesQ().isEmpty() || ! CacheCenter.isAllFilesCollected()) {
 
-			String fileDir = CacheCenter.pullFile();
-			if (CacheCenter.isAllFilesCollected()) {
-				System.out.println( " -------- > isAllFilesCollected");
-
-			}
+			String fileDir = CacheCenter.getFilesQ().poll();
 
 			if (fileDir == null && ! CacheCenter.isAllFilesCollected()) {
-				
-				// Try again
+				try {
+					Thread.sleep(50);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 				continue;
 			}
 			
-
-			File file = new File(fileDir); 
-			Scanner sc;
+			BufferedReader br = null;
 			try {
-				sc = new Scanner(file);
-				while (sc.hasNextLine()) {
-					String line = sc.nextLine();
-					for (int i = 0; i < line.length(); i++){
-					    char c = line.charAt(i);        
-					    if (CacheCenter.getCharsCount().containsKey(c)) {
-					    	int count = CacheCenter.getCharsCount().get(c);					    
-					    	CacheCenter.getCharsCount().put(c, ++count);
-					    }
+				File file = new File(fileDir); 
+				FileReader fr = new FileReader(file);
+				br = new BufferedReader(fr);
+				int c = 0;
+				while((c = br.read()) != -1) {
+					pushCharacterToArray(c);
+				}
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			} finally {
+				if (br != null) {
+					try {
+						br.close();
+					} catch (IOException e) {
+						e.printStackTrace();
 					}
 				}
-
-			} catch (FileNotFoundException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} 
-
-		}
 				
-		System.out.println("------------> ended FilesReader thread" ); 
+			}
+		}
+	}
+
+	private void pushCharacterToArray(int character) {
+		if (character > 96 && character < 123) {
+			// 97 = a = first index in the array = 0
+			CacheCenter.updateCharCounter(character-97);
+		}
 	}
 
 }

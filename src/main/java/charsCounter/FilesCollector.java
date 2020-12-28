@@ -1,8 +1,15 @@
-package charsCounter;
+package charscounter;
 
 import java.io.File;
+import java.util.ArrayList;
 
-
+/**
+ * The class is responsible for collecting the files and store them in array
+ * This class acts like a producer for the FilesReader
+ * 
+ * @author Braa'
+ *
+ */
 public class FilesCollector implements Runnable {
 
 	private String dirPath;
@@ -12,26 +19,26 @@ public class FilesCollector implements Runnable {
 	}
 
 	public void run() {
-		System.out.println("started FilesCollector");
-		
 		File folder = new File(dirPath);
 		listFilesForFolder(folder);
-		System.out.println("All files collected");
 		CacheCenter.setAllFilesCollected(true);
 	}
+	
 
 	public void listFilesForFolder(final File folder) {
 		
-		for (final File fileEntry : folder.listFiles()) {
-			if (! fileEntry.isDirectory()) {
-				CacheCenter.getFiles().add(fileEntry.getAbsolutePath());
-			}
-		}
+		ArrayList<File> subDirectories = new ArrayList<File>(); 
 		
 		for (final File fileEntry : folder.listFiles()) {
 			if (fileEntry.isDirectory()) {
-				listFilesForFolder(fileEntry);
+				subDirectories.add(fileEntry);
+			} else {
+				CacheCenter.getFilesQ().add(fileEntry.getAbsolutePath());
 			}
+		}
+		
+		for (File subDir : subDirectories) {
+			listFilesForFolder(subDir);
 		}
 	}
 }
