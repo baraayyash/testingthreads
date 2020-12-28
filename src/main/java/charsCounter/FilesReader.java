@@ -51,7 +51,6 @@ public class FilesReader implements Runnable {
 						e.printStackTrace();
 					}
 				}
-				
 			}
 		}
 	}
